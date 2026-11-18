@@ -38,7 +38,7 @@
       { key: "ncd", label: "NCD", type: "select", options: ["", "0%", "25%", "30%", "38.33%", "45%", "55%"] }] },
     { title: "4. Loan, insurance & service", open: true, fields: [
       T("loan", "LOAN (%)", { pct: true }), T("dp", "DOWN PAYMENT (%)", { pct: true }),
-      { key: "duration", label: "LOAN DURATION", type: "select", options: ["", "9 TAHUN", "7 TAHUN", "5 TAHUN"] },
+      { key: "duration", label: "LOAN DURATION", type: "select", options: ["", "1 TAHUN", "2 TAHUN", "3 TAHUN", "4 TAHUN", "5 TAHUN", "6 TAHUN", "7 TAHUN", "8 TAHUN", "9 TAHUN"] },
       { type: "checks", label: "INSURANCE", hint: "Choose either 1 or both.", items: [["ins_ws", "WINDSCREEN"], ["ins_sp", "SPECIAL PERIL"]] },
       { key: "svc", label: "SERVICE PACKAGE", type: "select", options: ["", "YES", "NO"] },
       { key: "svc_amt", label: "SERVICE PACKAGE AMOUNT (RM)", type: "svcamt", dep: "svc" }] },
