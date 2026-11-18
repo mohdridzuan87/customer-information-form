@@ -1,6 +1,6 @@
 {
-  "name": "Cust Info For S.A",
-  "short_name": "Cust Info S.A",
+  "name": "Customer Info For S.A Ref",
+  "short_name": "Client Info For S.A Ref",
   "description": "Fill the Customer Information Form for Sales Advisor reference and export an A4 PDF.",
   "start_url": "./index.html",
   "scope": "./",
