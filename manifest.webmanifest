@@ -1,6 +1,6 @@
 {
-  "name": "Toyota Customer Information Form",
-  "short_name": "Cust Info",
+  "name": "CUST INFO for SA",
+  "short_name": "CUST INFO for SA",
   "description": "Fill the Customer Information Form for Sales Advisor reference and export an A4 PDF.",
   "start_url": "./index.html",
   "scope": "./",
