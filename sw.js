@@ -1,5 +1,5 @@
 /* Offline cache for the Customer Information Form app. Bump VERSION when files change. */
-var VERSION = "custinfo-v7";
+var VERSION = "custinfo-v8";
 var FILES = ["./", "index.html", "style.css", "app.js", "vendor/jspdf.umd.min.js",
   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png"];
 
