@@ -95,3 +95,6 @@ details.sec[open] > summary { border-bottom: 1px solid var(--line); }
 .f input::placeholder, .f textarea::placeholder { color: #a8a8ad; opacity: 1; }
 
 .bar-title { white-space: normal; font-size: 16px; font-weight: 700; line-height: 1.25; }
+
+.icrow { display: grid; grid-template-columns: 1fr 96px; gap: 10px; }
+.agebox { display: flex; align-items: center; justify-content: center; background: var(--calc); border-radius: 8px; font-weight: 700; font-size: 15px; color: var(--ink); }

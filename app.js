@@ -52,6 +52,18 @@
     (kids || []).forEach(function (k) { if (k) e.appendChild(k); });
     return e;
   }
+  /* age from the first 6 digits of a Malaysian I.C (YYMMDD); century = latest year that is not in the future */
+  function ageFromIc(ic) {
+    var dg = String(ic || "").replace(/\D/g, "");
+    if (dg.length < 6) return null;
+    var yy = +dg.slice(0, 2), mm = +dg.slice(2, 4), dd = +dg.slice(4, 6), now = new Date();
+    var yr = 2000 + yy; if (yr > now.getFullYear()) yr -= 100;
+    var b = new Date(yr, mm - 1, dd);
+    if (b.getFullYear() !== yr || b.getMonth() !== mm - 1 || b.getDate() !== dd || b > now) return null;
+    var age = now.getFullYear() - yr;
+    if (now.getMonth() < mm - 1 || (now.getMonth() === mm - 1 && now.getDate() < dd)) age--;
+    return age >= 0 && age <= 120 ? age : null;
+  }
   function fieldEl(f) {
     if (f.type === "checks") {
       var boxes = f.items.map(function (it) {
@@ -84,6 +96,7 @@
     else if (f.pct) { input.setAttribute("inputmode", "decimal"); input.setAttribute("placeholder", "0"); input.className = "pct"; }
     else if (!f.nocaps) { input.setAttribute("autocapitalize", "characters"); input.className = "caps"; }
     else input.setAttribute("autocapitalize", "none");
+    if (f.ic) return el("label", { class: "f" }, [el("span", { text: f.label }), el("div", { class: "icrow" }, [input, el("div", { class: "agebox", id: "ageBox", text: "AGE -" })])]);
     return el("label", { class: "f" }, [el("span", { text: f.label }), input]);
   }
   function buildForm() {
@@ -148,6 +161,7 @@
     var d = current.data;
     document.querySelectorAll("[data-dep]").forEach(function (w) { w.hidden = d[w.getAttribute("data-dep")] !== "YES"; });
     $("dueVal").textContent = d.name || "-";
+    var ag = ageFromIc(d.ic); $("ageBox").textContent = "AGE " + (ag === null ? "-" : ag);
   }
   var saveTimer = null;
   function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveCurrent, 300); }
@@ -225,7 +239,7 @@
     var pc = function (v) { return v ? v + " %" : ""; };
     var trade = d.tradein === "YES" ? ("YES" + (d.tradein_det ? " - " + d.tradein_det : "")) : (d.tradein || "");
     var y = 37;
-    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["I.C NUMBER", d.ic], ["ADDRESS", "@addr"], ["PHONE NUMBER", d.tel], ["GUARANTOR PHONE NUMBER", d.guarantor],
+    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["I.C NUMBER", "@ic"], ["ADDRESS", "@addr"], ["PHONE NUMBER", d.tel], ["GUARANTOR PHONE NUMBER", d.guarantor],
       ["CUSTOMER EMAIL", d.email], ["CAR MODEL & SPEC", d.model], ["COLOUR", d.colour], ["NCD", d.ncd], ["ADDITIONAL ACCESSORIES", d.acc],
       ["LOAN (%)", pc(d.loan)], ["DOWN PAYMENT (%)", pc(d.dp)], ["LOAN DURATION", d.duration], ["INSURANCE", ins],
       ["SERVICE PACKAGE", svc], ["CAR REGISTERED NUMBER", d.plat], ["TRADE IN", trade], ["OTHER", d.other]];
@@ -236,6 +250,9 @@
         doc.setFont("helvetica", "bold"); doc.setFontSize(11);
         line(LX, R, y, parts[0] || ""); y += 9.4;
         line(LX, R, y, parts.slice(1).join(" "));
+      } else if (r[1] === "@ic") {
+        var agp = ageFromIc(d.ic);
+        line(LX, 135, y, d.ic); lab("AGE", 140, y); line(150, R, y, agp === null ? "" : String(agp));
       } else line(LX, R, y, r[1]);
       y += 9.4;
     });
