@@ -144,7 +144,7 @@
   function showList() {
     saveCurrent(); current = null;
     $("listView").hidden = false; $("editView").hidden = true; $("editBar").hidden = true;
-    $("backBtn").hidden = true; $("title").textContent = "Customer Information";
+    $("backBtn").hidden = true;
     renderList(); window.scrollTo(0, 0);
   }
   function renderList() {
@@ -175,7 +175,7 @@
     var o = forms.find(function (x) { return x.id === id; }); if (!o) return;
     current = o;
     $("listView").hidden = true; $("editView").hidden = false; $("editBar").hidden = false;
-    $("backBtn").hidden = false; $("title").textContent = "Information Form";
+    $("backBtn").hidden = false;
     fillForm(o.data); window.scrollTo(0, 0); location.hash = "#edit";
   }
   function newForm() {

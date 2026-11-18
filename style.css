@@ -93,3 +93,5 @@ details.sec[open] > summary { border-bottom: 1px solid var(--line); }
 .chk input { width: 20px; height: 20px; accent-color: var(--red); }
 .chk span { display: inline; margin: 0; color: var(--ink); font-size: 15px; }
 .f input::placeholder, .f textarea::placeholder { color: #a8a8ad; opacity: 1; }
+
+.bar-title { white-space: normal; font-size: 16px; font-weight: 700; line-height: 1.25; }
