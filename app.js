@@ -27,19 +27,21 @@
       T("sa", "SALES ADVISOR NAME", { ph: "WAN JASNI" })] },
     { title: "2. Customer", open: true, fields: [
       T("name", "NAME"), T("address", "ADDRESS", { type: "textarea" }),
-      T("tel", "NO TEL", { type: "tel", mode: "tel", nocaps: true }),
-      T("guarantor", "NO HP GUARANTOR", { type: "tel", mode: "tel", nocaps: true }),
-      T("email", "EMAIL", { type: "email", nocaps: true })] },
+      T("tel", "PHONE NUMBER", { type: "tel", mode: "tel", nocaps: true, phone: true }),
+      T("guarantor", "GUARANTOR PHONE NUMBER", { type: "tel", mode: "tel", nocaps: true, phone: true }),
+      T("email", "CUSTOMER EMAIL", { type: "email", nocaps: true })] },
     { title: "3. Vehicle", open: true, fields: [
-      T("model", "CAR MODEL & SPEC"), T("colour", "COLOUR"), T("plat", "PLAT NO"),
-      T("tradein", "TRADE IN"), T("acc", "ADDITIONAL ACCESSORIES"),
-      T("ncd", "NCD (%)", { pct: true })] },
+      T("model", "CAR MODEL & SPEC"), T("colour", "COLOUR"), T("plat", "CAR REGISTERED NUMBER"),
+      { key: "tradein", label: "TRADE IN", type: "select", options: ["", "YES", "NO"] },
+      { key: "tradein_det", label: "TRADE IN DETAILS (REQUIRED)", type: "dep", dep: "tradein", ph: "CAR MODEL / REGISTERED NUMBER" },
+      T("acc", "ADDITIONAL ACCESSORIES"),
+      { key: "ncd", label: "NCD", type: "select", options: ["", "0%", "25%", "30%", "38.33%", "45%", "55%"] }] },
     { title: "4. Loan, insurance & service", open: true, fields: [
       T("loan", "LOAN (%)", { pct: true }), T("dp", "DOWN PAYMENT (%)", { pct: true }),
       { key: "duration", label: "LOAN DURATION", type: "select", options: ["", "9 TAHUN", "7 TAHUN", "5 TAHUN"] },
       { type: "checks", label: "INSURANCE", hint: "Choose either 1 or both.", items: [["ins_ws", "WINDSCREEN"], ["ins_sp", "SPECIAL PERIL"]] },
       { key: "svc", label: "SERVICE PACKAGE", type: "select", options: ["", "YES", "NO"] },
-      { key: "svc_amt", label: "SERVICE PACKAGE AMOUNT (RM)", type: "svcamt" }] },
+      { key: "svc_amt", label: "SERVICE PACKAGE AMOUNT (RM)", type: "svcamt", dep: "svc" }] },
     { title: "5. Other & remark", open: true, fields: [
       T("other", "OTHER"), T("remark", "REMARK", { type: "textarea", ph: "ADDITIONAL REMARK" })] }
   ];
@@ -62,7 +64,11 @@
     }
     if (f.type === "svcamt") {
       var amt = el("input", { "data-k": f.key, type: "text", inputmode: "decimal", placeholder: "0.00", class: "mny" });
-      return el("label", { class: "f", id: "svcAmtWrap", hidden: "" }, [el("span", { text: f.label }), amt]);
+      return el("label", { class: "f", "data-dep": f.dep, hidden: "" }, [el("span", { text: f.label }), amt]);
+    }
+    if (f.type === "dep") {
+      var di = el("input", { "data-k": f.key, type: "text", placeholder: f.ph || "", autocapitalize: "characters", class: "caps" });
+      return el("label", { class: "f", "data-dep": f.dep, hidden: "" }, [el("span", { text: f.label }), di]);
     }
     if (f.type === "select") {
       var sel = el("select", { "data-k": f.key });
@@ -73,7 +79,8 @@
     if (f.type !== "textarea") input.setAttribute("type", f.type);
     if (f.ph) input.setAttribute("placeholder", f.ph);
     if (f.mode) input.setAttribute("inputmode", f.mode);
-    if (f.pct) { input.setAttribute("inputmode", "decimal"); input.setAttribute("placeholder", "0"); input.className = "pct"; }
+    if (f.phone) { input.setAttribute("placeholder", "012-345 6789"); input.setAttribute("maxlength", "13"); input.className = "phone"; input.setAttribute("autocapitalize", "none"); }
+    else if (f.pct) { input.setAttribute("inputmode", "decimal"); input.setAttribute("placeholder", "0"); input.className = "pct"; }
     else if (!f.nocaps) { input.setAttribute("autocapitalize", "characters"); input.className = "caps"; }
     else input.setAttribute("autocapitalize", "none");
     return el("label", { class: "f" }, [el("span", { text: f.label }), input]);
@@ -93,6 +100,7 @@
     document.querySelectorAll("#form [data-k]").forEach(function (i) {
       var v = data[i.getAttribute("data-k")]; v = v === undefined || v === null ? "" : v;
       if (i.type === "checkbox") { i.checked = v === "1"; return; }
+      if (i.tagName === "SELECT" && v && !Array.prototype.some.call(i.options, function (o) { return o.value === v; })) i.appendChild(el("option", { value: v, text: v }));
       i.value = v;
       if (i.className === "mny" && v) i.dispatchEvent(new Event("input", { bubbles: true }));
     });
@@ -114,6 +122,11 @@
         try { t.setSelectionRange(np, np); } catch (x) { /* ignore */ }
       }
     }
+    if (t.className === "phone") {
+      var dg = t.value.replace(/\D/g, "").slice(0, 11), ph = dg;
+      if (dg.length > 3) ph = dg.slice(0, 3) + "-" + dg.slice(3, dg.length >= 11 ? 7 : 6) + (dg.length > (dg.length >= 11 ? 7 : 6) ? " " + dg.slice(dg.length >= 11 ? 7 : 6) : "");
+      if (ph !== t.value) t.value = ph;
+    }
     if (t.className === "pct") {
       var pv = t.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
       if (pv !== t.value) t.value = pv;
@@ -127,7 +140,7 @@
   function refreshCalc() {
     if (!current) return;
     var d = current.data;
-    $("svcAmtWrap").hidden = d.svc !== "YES";
+    document.querySelectorAll("[data-dep]").forEach(function (w) { w.hidden = d[w.getAttribute("data-dep")] !== "YES"; });
     $("dueVal").textContent = d.name || "-";
   }
   var saveTimer = null;
@@ -204,11 +217,12 @@
     var ins = [d.ins_ws === "1" ? "WINDSCREEN" : "", d.ins_sp === "1" ? "SPECIAL PERIL" : ""].filter(Boolean).join(" + ");
     var svc = d.svc === "YES" ? ("YES" + (d.svc_amt ? " - RM " + money(num(d.svc_amt)).replace(/\.00$/, "") : "")) : (d.svc || "");
     var pc = function (v) { return v ? v + " %" : ""; };
+    var trade = d.tradein === "YES" ? ("YES" + (d.tradein_det ? " - " + d.tradein_det : "")) : (d.tradein || "");
     var y = 37;
-    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["ADDRESS", "@addr"], ["NO TEL", d.tel], ["NO HP GUARANTOR", d.guarantor],
-      ["EMAIL", d.email], ["CAR MODEL & SPEC", d.model], ["COLOUR", d.colour], ["NCD (%)", pc(d.ncd)], ["ADDITIONAL ACCESSORIES", d.acc],
+    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["ADDRESS", "@addr"], ["PHONE NUMBER", d.tel], ["GUARANTOR PHONE NUMBER", d.guarantor],
+      ["CUSTOMER EMAIL", d.email], ["CAR MODEL & SPEC", d.model], ["COLOUR", d.colour], ["NCD", d.ncd], ["ADDITIONAL ACCESSORIES", d.acc],
       ["LOAN (%)", pc(d.loan)], ["DOWN PAYMENT (%)", pc(d.dp)], ["LOAN DURATION", d.duration], ["INSURANCE", ins],
-      ["SERVICE PACKAGE", svc], ["PLAT NO", d.plat], ["TRADE IN", d.tradein], ["OTHER", d.other]];
+      ["SERVICE PACKAGE", svc], ["CAR REGISTERED NUMBER", d.plat], ["TRADE IN", trade], ["OTHER", d.other]];
     rows.forEach(function (r) {
       lab(r[0], L, y); lab(":", LX - 3, y);
       if (r[1] === "@addr") {
@@ -232,6 +246,9 @@
     return "Customer_Information_" + s + ".pdf";
   }
   function openSheet() {
+    if (current.data.tradein === "YES" && !String(current.data.tradein_det || "").trim()) {
+      toast("Please fill in the trade-in details."); var ti = document.querySelector('[data-k="tradein_det"]'); if (ti) ti.focus(); return;
+    }
     saveCurrent();
     var blob, name;
     try { blob = buildPdf(current.data).output("blob"); name = fileName(current.data); } catch (e) { toast("Could not create PDF: " + e.message); return; }
