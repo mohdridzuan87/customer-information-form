@@ -26,7 +26,7 @@
     { title: "1. Sales Advisor", open: true, fields: [
       T("sa", "SALES ADVISOR NAME", { ph: "WAN JASNI" })] },
     { title: "2. Customer", open: true, fields: [
-      T("name", "NAME"), T("address", "ADDRESS", { type: "textarea" }),
+      T("name", "NAME"), T("ic", "I.C NUMBER", { mode: "numeric", nocaps: true, ic: true }), T("address", "ADDRESS", { type: "textarea" }),
       T("tel", "PHONE NUMBER", { type: "tel", mode: "tel", nocaps: true, phone: true }),
       T("guarantor", "GUARANTOR PHONE NUMBER", { type: "tel", mode: "tel", nocaps: true, phone: true }),
       T("email", "CUSTOMER EMAIL", { type: "email", nocaps: true })] },
@@ -79,7 +79,8 @@
     if (f.type !== "textarea") input.setAttribute("type", f.type);
     if (f.ph) input.setAttribute("placeholder", f.ph);
     if (f.mode) input.setAttribute("inputmode", f.mode);
-    if (f.phone) { input.setAttribute("placeholder", "012-345 6789"); input.setAttribute("maxlength", "13"); input.className = "phone"; input.setAttribute("autocapitalize", "none"); }
+    if (f.ic) { input.setAttribute("placeholder", "000000-00-0000"); input.setAttribute("maxlength", "14"); input.className = "ic"; input.setAttribute("autocapitalize", "none"); }
+    else if (f.phone) { input.setAttribute("placeholder", "012-345 6789"); input.setAttribute("maxlength", "13"); input.className = "phone"; input.setAttribute("autocapitalize", "none"); }
     else if (f.pct) { input.setAttribute("inputmode", "decimal"); input.setAttribute("placeholder", "0"); input.className = "pct"; }
     else if (!f.nocaps) { input.setAttribute("autocapitalize", "characters"); input.className = "caps"; }
     else input.setAttribute("autocapitalize", "none");
@@ -121,6 +122,11 @@
         var n = 0, np = 0; while (np < out.length && n < before) { if (/[0-9.]/.test(out[np])) n++; np++; }
         try { t.setSelectionRange(np, np); } catch (x) { /* ignore */ }
       }
+    }
+    if (t.className === "ic") {
+      var id = t.value.replace(/\D/g, "").slice(0, 12), icv = id;
+      if (id.length > 6) icv = id.slice(0, 6) + "-" + id.slice(6, 8) + (id.length > 8 ? "-" + id.slice(8) : "");
+      if (icv !== t.value) t.value = icv;
     }
     if (t.className === "phone") {
       var dg = t.value.replace(/\D/g, "").slice(0, 11), ph = dg;
@@ -219,7 +225,7 @@
     var pc = function (v) { return v ? v + " %" : ""; };
     var trade = d.tradein === "YES" ? ("YES" + (d.tradein_det ? " - " + d.tradein_det : "")) : (d.tradein || "");
     var y = 37;
-    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["ADDRESS", "@addr"], ["PHONE NUMBER", d.tel], ["GUARANTOR PHONE NUMBER", d.guarantor],
+    var rows = [["SALES ADVISOR NAME", d.sa], ["NAME", d.name], ["I.C NUMBER", d.ic], ["ADDRESS", "@addr"], ["PHONE NUMBER", d.tel], ["GUARANTOR PHONE NUMBER", d.guarantor],
       ["CUSTOMER EMAIL", d.email], ["CAR MODEL & SPEC", d.model], ["COLOUR", d.colour], ["NCD", d.ncd], ["ADDITIONAL ACCESSORIES", d.acc],
       ["LOAN (%)", pc(d.loan)], ["DOWN PAYMENT (%)", pc(d.dp)], ["LOAN DURATION", d.duration], ["INSURANCE", ins],
       ["SERVICE PACKAGE", svc], ["CAR REGISTERED NUMBER", d.plat], ["TRADE IN", trade], ["OTHER", d.other]];
